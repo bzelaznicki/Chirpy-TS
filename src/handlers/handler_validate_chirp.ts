@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { respondWithError, respondWithJSON } from "../api/json.js";
 
 export async function handlerValidateChirp(req: Request, res: Response){
     type parameters = {
@@ -15,33 +16,35 @@ export async function handlerValidateChirp(req: Request, res: Response){
             }
             
             if (params.body.length > 140) {
-                type responseData = {
-                    error: string,
-                }
-                const response: responseData = {
-                    error: "Chirp is too long",
-                }
-                const respBody = JSON.stringify(response);
-                res.header("Content-Type", "application/json");
-                res.status(400).send(respBody);
+                respondWithError(res, 400, "Chirp is too long")
                 return;
             }
-            type responseData = {
-                valid: boolean,
+
+
+              let stringArr = params.body.split(" ");
+              const cleanedString: string[] = [];
+
+              for (let word of stringArr) {
+                if (word.toLowerCase() === "kerfuffle" || 
+                    word.toLowerCase() === "sharbert" || 
+                    word.toLowerCase() === "fornax") {
+                        word = "****";
+                }
+                cleanedString.push(word);
+
+              }
+              type responseData = {
+                cleanedBody: string,
               };
             
               const respBody: responseData = {
-                valid: true,
+                cleanedBody: cleanedString.join(" "),
                 
               };
-            
-              res.header("Content-Type", "application/json");
-              const response = JSON.stringify(respBody);
-              res.status(200).send(response);
+              respondWithJSON(res, 200, respBody);
 
         } catch (error){
-            res.header("Content-Type", "application/json");
-            res.status(400).send(JSON.stringify({ error: "Something went wrong" }));
+            respondWithError(res, 400, "Something went wrong")
         }
 
 }
