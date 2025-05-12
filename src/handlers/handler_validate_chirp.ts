@@ -6,7 +6,7 @@ export async function handlerValidateChirp(req: Request, res: Response){
         body: string;
       };
 
-        try{
+
             const params: parameters = req.body;
             
             if (typeof params.body !== "string") {
@@ -15,9 +15,11 @@ export async function handlerValidateChirp(req: Request, res: Response){
                 return;
             }
             
+
             if (params.body.length > 140) {
-                respondWithError(res, 400, "Chirp is too long")
-                return;
+                throw new Error ("Chirp is too long");
+                //respondWithError(res, 400, "Chirp is too long")
+                //return;
             }
 
 
@@ -43,8 +45,6 @@ export async function handlerValidateChirp(req: Request, res: Response){
               };
               respondWithJSON(res, 200, respBody);
 
-        } catch (error){
-            respondWithError(res, 400, "Something went wrong")
-        }
+        
 
 }

@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { config } from "./config.js";
+import { respondWithError } from "./api/json.js";
 
 export function middlewareLogResponses(req: Request, res: Response, next: NextFunction): void {
     res.on("finish", () => {
@@ -17,3 +18,15 @@ export function middlewareMetricsInc(req: Request, res: Response, next: NextFunc
 
     next();
 }
+
+export function errorHandler(
+    err: Error,
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) {
+    console.error(`Unhandled error: ${err}`);
+    respondWithError(res, 500, "Something went wrong on our end")
+  }
+  
+  
