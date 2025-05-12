@@ -1,23 +1,20 @@
 import { Request, Response } from "express";
 
 export async function handlerValidateChirp(req: Request, res: Response){
-    let body = "";
+    type parameters = {
+        body: string;
+      };
 
-    req.on("data", (chunk) =>  {
-        body += chunk;
-    });
-
-    req.on("end", () => {
         try{
-            const parsedBody = JSON.parse(body);
+            const params: parameters = req.body;
             
-            if (typeof parsedBody.body !== "string") {
+            if (typeof params.body !== "string") {
                 res.header("Content-Type", "application/json");
                 res.status(400).send(JSON.stringify({ error: "Invalid body" }));  
                 return;
             }
             
-            if (parsedBody.body.length > 140) {
+            if (params.body.length > 140) {
                 type responseData = {
                     error: string,
                 }
@@ -46,5 +43,5 @@ export async function handlerValidateChirp(req: Request, res: Response){
             res.header("Content-Type", "application/json");
             res.status(400).send(JSON.stringify({ error: "Something went wrong" }));
         }
-    })
+
 }
