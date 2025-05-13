@@ -8,6 +8,13 @@
       "when": 1747139447926,
       "tag": "0000_sleepy_vampiro",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1747169151616,
+      "tag": "0001_rainy_mole_man",
+      "breakpoints": true
     }
   ]
 }
