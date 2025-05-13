@@ -11,9 +11,8 @@ export async function handlerValidateChirp(req: Request, res: Response){
             const params: parameters = req.body;
             
             if (typeof params.body !== "string") {
-                res.header("Content-Type", "application/json");
-                res.status(400).send(JSON.stringify({ error: "Invalid body" }));  
-                return;
+                throw new BadRequestError ("Invalid body");
+                
             }
             
 

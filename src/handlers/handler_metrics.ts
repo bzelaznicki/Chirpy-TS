@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { config } from "../config.js";
+import {resetUsers} from "../lib/db/queries/users.js"
 
 export async function handlerMetrics(req: Request, res: Response){
     res.set('Content-Type', 'text/html; charset=utf-8');
@@ -14,6 +15,7 @@ export async function handlerMetrics(req: Request, res: Response){
 
 export async function handlerReset(req: Request, res: Response){
     config.api.fileserverHits = 0;
+    await resetUsers();
     res.set('Content-Type', 'text/plain; charset=utf-8');
 
     res.send("OK");
