@@ -1,7 +1,8 @@
 import express from "express";
 import path from "path";
 import { handlerReadiness } from "./handlers/handler_readiness.js";
-import { middlewareLogResponses, middlewareMetricsInc, errorHandler } from "./middleware.js";
+import { middlewareLogResponses, middlewareMetricsInc } from "./middleware.js";
+import { errorHandler } from "./error_middleware.js";
 import { handlerMetrics, handlerReset } from "./handlers/handler_metrics.js";
 import { handlerValidateChirp } from "./handlers/handler_validate_chirp.js";
 

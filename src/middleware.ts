@@ -19,14 +19,5 @@ export function middlewareMetricsInc(req: Request, res: Response, next: NextFunc
     next();
 }
 
-export function errorHandler(
-    err: Error,
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ) {
-    console.error(`Unhandled error: ${err}`);
-    respondWithError(res, 500, "Something went wrong on our end")
-  }
-  
+
   
