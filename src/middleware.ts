@@ -13,7 +13,7 @@ export function middlewareLogResponses(req: Request, res: Response, next: NextFu
 
 export function middlewareMetricsInc(req: Request, res: Response, next: NextFunction){
     res.on("finish", () => {
-        config.fileserverHits++;
+        config.api.fileserverHits++;
     })
 
     next();
