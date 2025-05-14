@@ -15,6 +15,13 @@
       "when": 1747169151616,
       "tag": "0001_rainy_mole_man",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1747213104879,
+      "tag": "0002_solid_toro",
+      "breakpoints": true
     }
   ]
 }
