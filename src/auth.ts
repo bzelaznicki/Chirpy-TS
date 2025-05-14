@@ -1,10 +1,12 @@
 import bcrypt from 'bcrypt';
 import jwt, { JwtPayload } from 'jsonwebtoken';
+import { Request } from 'express';
+import { UnauthorizedError } from './error_middleware.js';
+import { config } from './config.js';
 
 
-const TOKEN_ISSUER = "chirpy";
 export async function hashPassword(password: string): Promise<string> {
-    const minPasswordLength = 6;
+    const minPasswordLength = 5;
     if (password.length < minPasswordLength){
         throw new Error(`Password too short. Minimum length: ${minPasswordLength}`); 
     }
@@ -23,7 +25,7 @@ export function makeJWT(userID: string, expiresIn: number, secret: string): stri
 
     const now = Math.floor(Date.now() / 1000);
     const payload: payload = {
-        iss: TOKEN_ISSUER,
+        iss: config.jwt.issuer,
         sub: userID
     };
     return jwt.sign(payload, secret, {algorithm: "HS256",expiresIn: expiresIn});
@@ -45,5 +47,15 @@ export function validateJWT(tokenString: string, secret: string): string {
         throw new Error("Unknown error during JWT validation");
     }
 }
+
+}
+
+export function getBearerToken(req: Request): string {
+    const tokenArr = req.get("Authorization")?.split(" ");
+    if (!tokenArr || tokenArr.length !== 2 || tokenArr[0] !== "Bearer"){
+        throw new UnauthorizedError("Invalid bearer token");
+    }
+    
+    return tokenArr[1];
 
 }

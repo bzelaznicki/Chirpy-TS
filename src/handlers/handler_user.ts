@@ -2,12 +2,14 @@ import { Request, Response } from "express";
 import { BadRequestError, NotFoundError, UnauthorizedError } from "../error_middleware.js";
 import { createUser, getUserByEmail } from "../lib/db/queries/users.js";
 import { respondWithJSON } from "../api/json.js";
-import { checkPasswordHash, hashPassword } from "../auth.js";
-import { NewUser } from "src/lib/db/schema.js";
+import { checkPasswordHash, hashPassword, makeJWT } from "../auth.js";
+import { NewUser } from "../lib/db/schema.js";
+import { config } from "../config.js";
 
     type Parameters = {
-        email: string;
-        password: string;
+        email: string,
+        password: string,
+        expiresInSeconds?: number,
     };
 
 export async function handlerCreateUser(req: Request, res: Response) {
@@ -51,6 +53,8 @@ export async function handlerLogin(req: Request, res: Response) {
         throw new BadRequestError("Invalid body - email and password must be strings");
     }
 
+    
+
     try {
         const user = await getUserByEmail(params.email);
         
@@ -62,12 +66,18 @@ export async function handlerLogin(req: Request, res: Response) {
         if (!isValidPassword) {
             throw new UnauthorizedError("Incorrect email or password");
         }
+        let expirationTime = config.jwt.defaultDuration;
+          if (params.expiresInSeconds && !(params.expiresInSeconds > config.jwt.defaultDuration)) {
+            expirationTime = params.expiresInSeconds;
+        }
+        const token = makeJWT(user.id, expirationTime, config.jwt.secret);
 
         respondWithJSON(res, 200, {
             id: user.id,
             createdAt: user.createdAt,
             updatedAt: user.updatedAt,
             email: user.email,
+            token: token,
         });
     } catch (error) {
         

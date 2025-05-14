@@ -1,7 +1,9 @@
 import { Request, Response } from "express";
 import { respondWithJSON } from "../api/json.js";
-import { BadRequestError } from "../error_middleware.js";
+import { BadRequestError, UnauthorizedError } from "../error_middleware.js";
 import { createChirp } from "../lib/db/queries/chirps.js";
+import { getBearerToken, validateJWT } from "../auth.js";
+import { config } from "../config.js";
 
 export async function handlerPostChirp(req: Request, res: Response){
     type parameters = {
@@ -18,11 +20,15 @@ export async function handlerPostChirp(req: Request, res: Response){
             }
             
             const cleaned = validateChirp(params.body);
+            const jwtToken = getBearerToken(req);
+            const validToken = validateJWT(jwtToken, config.jwt.secret);
+
+            if (!validToken) {
+              throw new UnauthorizedError(`Invalid bearer token`);
+            }
 
 
-
-
-              const postedChirp = await createChirp({body: cleaned, userId: params.userId});
+              const postedChirp = await createChirp({body: cleaned, userId: validToken});
 
               respondWithJSON(res, 201, postedChirp);
 
