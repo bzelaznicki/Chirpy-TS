@@ -11,7 +11,7 @@ export async function handlerPostChirp(req: Request, res: Response){
         userId: string;
       };
 
-
+        try {
             const params: parameters = req.body;
             
             if (typeof params.body !== "string") {
@@ -32,7 +32,11 @@ export async function handlerPostChirp(req: Request, res: Response){
 
               respondWithJSON(res, 201, postedChirp);
 
-        
+          } catch (error){
+            if (error instanceof UnauthorizedError){
+              throw new UnauthorizedError(`Authentication failed.`)
+            }
+          }
 
 }
 

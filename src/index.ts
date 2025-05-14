@@ -12,6 +12,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import { config } from "./config.js";
 import { handlerCreateUser, handlerLogin } from "./handlers/handler_user.js";
 import { handlerGetChirps, handlerGetSingleChirp } from "./handlers/handler_get_chirps.js";
+import { handlerRefresh, handlerRevokeToken } from "./handlers/handler_tokens.js";
 
 const migrationClient = postgres(config.db.url, { max: 1 });
 await migrate(drizzle(migrationClient), config.db.migrationConfig);
@@ -81,6 +82,22 @@ app.post("/api/login", async (req, res, next) => {
     next(err); 
   }
 });
+app.post("/api/revoke", async (req, res, next) => {
+  try {
+    await handlerRevokeToken(req, res);
+  } catch (err) {
+    next(err); 
+  }
+});
+
+app.post("/api/refresh", async (req, res, next) => {
+  try {
+    await handlerRefresh(req, res);
+  } catch (err) {
+    next(err); 
+  }
+});
+
 app.use(errorHandler);
 app.listen(config.api.port, () => {
     console.log(`Server is running at http://localhost:${config.api.port}`);

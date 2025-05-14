@@ -3,6 +3,8 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 import { Request } from 'express';
 import { UnauthorizedError } from './error_middleware.js';
 import { config } from './config.js';
+import { randomBytes } from 'crypto';
+import { saveRefreshToken } from './lib/db/queries/refresh_tokens.js';
 
 
 export async function hashPassword(password: string): Promise<string> {
@@ -42,9 +44,9 @@ export function validateJWT(tokenString: string, secret: string): string {
     return verifiedToken.sub;
 }   catch (error) {
     if (error instanceof Error) {
-        throw new Error(`Cannot verify JWT Token: ${error.message}`);
+        throw new UnauthorizedError(`Cannot verify JWT Token: ${error.message}`);
     } else {
-        throw new Error("Unknown error during JWT validation");
+        throw new UnauthorizedError("Unknown error during JWT validation");
     }
 }
 
@@ -58,4 +60,22 @@ export function getBearerToken(req: Request): string {
     
     return tokenArr[1];
 
+}
+export function makeRefreshToken(){
+    return randomBytes(32).toString('hex');
+}
+
+export async function NewRefreshToken(userId: string, refreshToken: string) {
+
+    const expiresAt = new Date();
+    
+    expiresAt.setDate(expiresAt.getDate() + 60);
+    
+    const savedToken = await saveRefreshToken({
+        token: refreshToken,
+        userId: userId,
+        expiresAt: expiresAt, 
+    });
+    
+    return savedToken;
 }

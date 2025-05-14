@@ -2,14 +2,13 @@ import { Request, Response } from "express";
 import { BadRequestError, NotFoundError, UnauthorizedError } from "../error_middleware.js";
 import { createUser, getUserByEmail } from "../lib/db/queries/users.js";
 import { respondWithJSON } from "../api/json.js";
-import { checkPasswordHash, hashPassword, makeJWT } from "../auth.js";
+import { checkPasswordHash, hashPassword, makeJWT, makeRefreshToken, NewRefreshToken } from "../auth.js";
 import { NewUser } from "../lib/db/schema.js";
 import { config } from "../config.js";
 
     type Parameters = {
         email: string,
         password: string,
-        expiresInSeconds?: number,
     };
 
 export async function handlerCreateUser(req: Request, res: Response) {
@@ -66,11 +65,16 @@ export async function handlerLogin(req: Request, res: Response) {
         if (!isValidPassword) {
             throw new UnauthorizedError("Incorrect email or password");
         }
-        let expirationTime = config.jwt.defaultDuration;
-          if (params.expiresInSeconds && !(params.expiresInSeconds > config.jwt.defaultDuration)) {
-            expirationTime = params.expiresInSeconds;
+
+        const token = makeJWT(user.id, config.jwt.defaultDuration, config.jwt.secret);
+        const refreshToken = makeRefreshToken()
+
+        const savedToken = await NewRefreshToken(user.id, refreshToken);
+
+        if (!savedToken){
+            throw new UnauthorizedError("Failed to generate token");
+            
         }
-        const token = makeJWT(user.id, expirationTime, config.jwt.secret);
 
         respondWithJSON(res, 200, {
             id: user.id,
@@ -78,6 +82,7 @@ export async function handlerLogin(req: Request, res: Response) {
             updatedAt: user.updatedAt,
             email: user.email,
             token: token,
+            refreshToken: savedToken.token,
         });
     } catch (error) {
         

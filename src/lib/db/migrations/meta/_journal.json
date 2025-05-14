@@ -22,6 +22,13 @@
       "when": 1747213104879,
       "tag": "0002_solid_toro",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1747249628911,
+      "tag": "0003_lyrical_komodo",
+      "breakpoints": true
     }
   ]
 }
