@@ -1,15 +1,18 @@
 import { Request, Response } from "express";
 import { BadRequestError, NotFoundError, UnauthorizedError } from "../error_middleware.js";
-import { createUser, getUserByEmail } from "../lib/db/queries/users.js";
+import { createUser, getUserByEmail, updateUser } from "../lib/db/queries/users.js";
 import { respondWithJSON } from "../api/json.js";
-import { checkPasswordHash, hashPassword, makeJWT, makeRefreshToken, NewRefreshToken } from "../auth.js";
+import { checkPasswordHash, getBearerToken, hashPassword, makeJWT, makeRefreshToken, NewRefreshToken, validateJWT } from "../auth.js";
 import { NewUser } from "../lib/db/schema.js";
 import { config } from "../config.js";
 
     type Parameters = {
-        email: string,
-        password: string,
+        email?: string,
+        password?: string,
     };
+
+
+export type UserResponse = Omit<NewUser, "hashedPassword">;
 
 export async function handlerCreateUser(req: Request, res: Response) {
     const params: Parameters = req.body;
@@ -20,7 +23,7 @@ export async function handlerCreateUser(req: Request, res: Response) {
 
     try {
         const hashedPassword = await hashPassword(params.password);
-        const createdUser = await createUser({
+        const createdUser: UserResponse = await createUser({
             email: params.email,
             hashedPassword: hashedPassword,
         });
@@ -29,12 +32,7 @@ export async function handlerCreateUser(req: Request, res: Response) {
             throw new Error("Could not create user");
         }
 
-        respondWithJSON(res, 201, {
-            id: createdUser.id,
-            createdAt: createdUser.createdAt,
-            updatedAt: createdUser.updatedAt,
-            email: createdUser.email,
-        });
+        respondWithJSON(res, 201, createdUser);
     } catch (error) {
         if (error instanceof Error) {
             if (error.message.includes("Password too short")) {
@@ -91,4 +89,28 @@ export async function handlerLogin(req: Request, res: Response) {
         }
         throw new UnauthorizedError("Incorrect email or password");
     }
+}
+
+export async function handlerUpdateUser(req: Request, res: Response){
+    const params: Parameters = req.body;
+                if (typeof params.email !== "string" || typeof params.password !== "string") {
+                    throw new BadRequestError("Invalid body - email and password must be strings");
+                }
+
+                const jwtToken = getBearerToken(req);
+                const userToken = validateJWT(jwtToken, config.jwt.secret);
+    
+                if (!userToken) {
+                  throw new UnauthorizedError(`Invalid bearer token`);
+                }
+
+                const hashedPassword = params.password ? await hashPassword(params.password) : "";
+
+                const updatedUser: UserResponse = await updateUser(userToken, params.email ? params.email : undefined, hashedPassword ? hashedPassword : undefined);
+
+                if (!updatedUser) {
+                    throw new BadRequestError("User not found");
+                }
+                
+                respondWithJSON(res, 200, updatedUser);
 }
