@@ -14,6 +14,7 @@ import { handlerCreateUser, handlerLogin, handlerUpdateUser } from "./handlers/h
 import { handlerGetChirps, handlerGetSingleChirp } from "./handlers/handler_get_chirps.js";
 import { handlerRefresh, handlerRevokeToken } from "./handlers/handler_tokens.js";
 import { handlerDeleteChirp } from "./handlers/handler_delete_chirp.js";
+import { handlerWebhookPolka } from "./handlers/handler_webhook_polka.js";
 
 const migrationClient = postgres(config.db.url, { max: 1 });
 await migrate(drizzle(migrationClient), config.db.migrationConfig);
@@ -112,6 +113,15 @@ app.post("/api/refresh", async (req, res, next) => {
     next(err); 
   }
 });
+
+app.post("/api/polka/webhooks", async (req, res, next) => {
+  try {
+    await handlerWebhookPolka(req, res);
+  } catch (err) {
+    next(err); 
+  }
+});
+
 
 app.use(errorHandler);
 app.listen(config.api.port, () => {

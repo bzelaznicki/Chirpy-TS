@@ -74,14 +74,7 @@ export async function handlerLogin(req: Request, res: Response) {
             
         }
 
-        respondWithJSON(res, 200, {
-            id: user.id,
-            createdAt: user.createdAt,
-            updatedAt: user.updatedAt,
-            email: user.email,
-            token: token,
-            refreshToken: savedToken.token,
-        });
+        respondWithJSON(res, 200, user);
     } catch (error) {
         
         if (error instanceof UnauthorizedError) {
