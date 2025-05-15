@@ -5,6 +5,7 @@ type Config = {
     api: APIConfig,
     db: DBConfig,
     jwt: JWTConfig,
+    polkaKey: string
 }
 
 type APIConfig = {
@@ -43,7 +44,8 @@ export const config: Config = {
         secret: envOrThrow("JWT_SECRET"),
         defaultDuration: 3600,
         issuer: "chirpy",
-}
+},
+polkaKey: envOrThrow("POLKA_KEY"),
     }
     
 
