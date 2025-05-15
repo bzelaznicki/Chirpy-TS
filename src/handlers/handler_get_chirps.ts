@@ -20,7 +20,32 @@ export async function handlerGetChirps(req: Request, res: Response){
         authorId = authorIdQuery;
     }
 
-    const chirps = await getChirps(authorId || undefined);
+    let descSorting = false;
+    let sortingQuery = req.query.sort;
+
+    if (Array.isArray(sortingQuery)){
+        throw new BadRequestError("Provide only one authorId");
+    }
+
+    if (typeof sortingQuery === "string") {
+        if (sortingQuery !== "asc" && sortingQuery !== "desc"){
+            throw new BadRequestError(`Invalid sorting method: ${sortingQuery}`);
+        }
+        if (sortingQuery === "desc"){
+            descSorting = true;
+        }
+    }
+
+
+    let chirps = await getChirps(authorId || undefined);
+
+    chirps = chirps.sort((a, b) => {
+    if (descSorting) {
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    } else {
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    }
+});
 
     respondWithJSON(res, 200, chirps);
 }
