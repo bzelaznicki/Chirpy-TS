@@ -35,6 +35,8 @@ export async function handlerPostChirp(req: Request, res: Response){
           } catch (error){
             if (error instanceof UnauthorizedError){
               throw new UnauthorizedError(`Authentication failed: ${error.message}`)
+            } else {
+              throw error
             }
           }
 
