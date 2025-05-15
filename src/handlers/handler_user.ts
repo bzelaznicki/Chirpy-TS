@@ -74,7 +74,23 @@ export async function handlerLogin(req: Request, res: Response) {
             
         }
 
-        respondWithJSON(res, 200, user);
+        const response: UserResponse = {
+            id: user.id,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
+            email: user.email,
+            isChirpyRed: user.isChirpyRed,
+        }
+
+        respondWithJSON(res, 200, {
+            id: user.id,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
+            email: user.email,
+            isChirpyRed: user.isChirpyRed,
+            token: token,
+            refreshToken: refreshToken,
+        });
     } catch (error) {
         
         if (error instanceof UnauthorizedError) {

@@ -8,7 +8,6 @@ import { config } from "../config.js";
 export async function handlerPostChirp(req: Request, res: Response){
     type parameters = {
         body: string;
-        userId: string;
       };
 
         try {
@@ -21,6 +20,7 @@ export async function handlerPostChirp(req: Request, res: Response){
             
             const cleaned = validateChirp(params.body);
             const jwtToken = getBearerToken(req);
+            console.log(`Bearer token: ${jwtToken}`);
             const validToken = validateJWT(jwtToken, config.jwt.secret);
 
             if (!validToken) {
@@ -34,7 +34,7 @@ export async function handlerPostChirp(req: Request, res: Response){
 
           } catch (error){
             if (error instanceof UnauthorizedError){
-              throw new UnauthorizedError(`Authentication failed.`)
+              throw new UnauthorizedError(`Authentication failed: ${error.message}`)
             }
           }
 

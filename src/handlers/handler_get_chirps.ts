@@ -1,11 +1,26 @@
 import { Request, Response } from "express";
 import { respondWithJSON } from "../api/json.js";
 import { BadRequestError, NotFoundError } from "../error_middleware.js";
-import { getChirps, getSingleChirp } from "../lib/db/queries/chirps.js";
+import { getChirps, getChirpsByAuthor, getSingleChirp } from "../lib/db/queries/chirps.js";
+import { validate } from "uuid";
 
 
 export async function handlerGetChirps(req: Request, res: Response){
-    const chirps = await getChirps();
+    let authorId = "";
+    let authorIdQuery = req.query.authorId;
+
+    if (Array.isArray(authorIdQuery)){
+        throw new BadRequestError("Provide only one authorId");
+    }
+
+    if (typeof authorIdQuery === "string") {
+        if (!validate(authorIdQuery)){
+            throw new BadRequestError(`Invalid UUID on authorId`);
+        }
+        authorId = authorIdQuery;
+    }
+
+    const chirps = await getChirps(authorId || undefined);
 
     respondWithJSON(res, 200, chirps);
 }
